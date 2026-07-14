@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Baupreisindex – Bauzeitbedingte Preisfortschreibung | Hoffmeier</title>
+<link rel="icon" href="img/hoffmeier-app.ico">
+<style>
+:root{
+  --hm-gold:#EAB312;
+  --hm-gold-dark:#d4a210;
+  --hm-dunkelgrau:#606566;
+  --hm-mittelgrau:#717677;
+  --hm-rot:#CC1135;
+  --hm-hellgrau:#F4F4F4;
+  --hm-text:#333333;
+  --hm-weiss:#FFFFFF;
+  --hm-gruen:#2E7D32;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--hm-hellgrau);color:var(--hm-text);font-size:14px}
+
+header{background:var(--hm-weiss);border-bottom:3px solid var(--hm-gold);padding:14px 28px;display:flex;align-items:center;gap:24px}
+header img{height:44px}
+header .titles h1{font-size:19px;color:var(--hm-dunkelgrau);letter-spacing:.3px}
+header .titles p{font-size:12px;color:var(--hm-mittelgrau);margin-top:2px}
+header .hilfe-link{margin-left:auto;text-decoration:none;background:transparent;color:var(--hm-dunkelgrau);border:1px solid var(--hm-dunkelgrau);border-radius:4px;padding:9px 16px;font-weight:bold;font-size:13px;white-space:nowrap}
+header .hilfe-link:hover{background:var(--hm-hellgrau)}
+
+main{max-width:1060px;margin:24px auto;padding:0 20px}
+
+.card{background:var(--hm-weiss);border:1px solid #e2e2e2;border-radius:6px;padding:22px 26px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card h2{font-size:15px;color:var(--hm-dunkelgrau);text-transform:uppercase;letter-spacing:.6px;border-bottom:2px solid var(--hm-gold);padding-bottom:8px;margin-bottom:16px}
+
+.btn{display:inline-block;border:none;border-radius:4px;padding:10px 18px;font-family:Arial,sans-serif;font-weight:bold;font-size:13px;cursor:pointer;letter-spacing:.3px}
+.btn-gold{background:var(--hm-gold);color:#333}
+.btn-gold:hover{background:var(--hm-gold-dark)}
+.btn-grey{background:var(--hm-dunkelgrau);color:#fff}
+.btn-grey:hover{background:#4d5152}
+.btn-ghost{background:transparent;color:var(--hm-dunkelgrau);border:1px solid var(--hm-dunkelgrau)}
+.btn-ghost:hover{background:var(--hm-hellgrau)}
+.btn-rot{background:transparent;color:var(--hm-rot);border:1px solid var(--hm-rot)}
+.btn-rot:hover{background:#fdeef1}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.statusline{font-size:12px;color:var(--hm-mittelgrau);margin-bottom:18px}
+.statusline a{color:var(--hm-dunkelgrau)}
+.badge{display:inline-block;background:var(--hm-dunkelgrau);color:#fff;border-radius:3px;padding:2px 8px;font-size:11px;margin-left:6px}
+.badge.warn{background:var(--hm-rot)}
+.badge.ok{background:var(--hm-gruen)}
+
+table.liste{width:100%;border-collapse:collapse}
+table.liste th{background:var(--hm-dunkelgrau);color:#fff;text-align:left;padding:9px 12px;font-size:12px;letter-spacing:.4px}
+table.liste td{padding:9px 12px;border-bottom:1px solid #e5e5e5;font-size:13px}
+table.liste tr:nth-child(even) td{background:var(--hm-hellgrau)}
+table.liste tr.klick{cursor:pointer}
+table.liste tr.klick:hover td{background:#fdf6dd}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 26px}
+.grid .full{grid-column:1/-1}
+label{display:block;font-size:12px;font-weight:bold;color:var(--hm-mittelgrau);margin-bottom:4px;letter-spacing:.3px}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:4px;font-family:Arial,sans-serif;font-size:13px;color:var(--hm-text);background:#fff}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--hm-gold);border-color:var(--hm-gold)}
+textarea{resize:vertical;min-height:64px}
+.inline{display:flex;gap:8px}
+.inline select{width:110px}
+
+.rechnung{width:100%;border-collapse:collapse;margin-top:6px}
+.rechnung th{background:var(--hm-dunkelgrau);color:#fff;text-align:left;padding:8px 12px;font-size:12px}
+.rechnung td{padding:8px 12px;border-bottom:1px solid #e5e5e5;font-size:13px}
+.rechnung tr:nth-child(even) td{background:var(--hm-hellgrau)}
+.rechnung td.zahl{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rechnung tr.ergebnis td{background:#fdf3d0;font-weight:bold;border-top:2px solid var(--hm-gold);font-size:14px}
+
+.hinweis{border-left:4px solid var(--hm-gold);background:#fdf6dd;padding:10px 14px;font-size:12.5px;margin:12px 0;border-radius:0 4px 4px 0}
+.hinweis.rot{border-left-color:var(--hm-rot);background:#fdeef1}
+
+.shot{max-width:100%;border:1px solid #ddd;border-radius:4px;max-height:420px;object-fit:cover;object-position:top}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.hidden{display:none}
+.muted{color:var(--hm-mittelgrau);font-size:12px}
+
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--hm-dunkelgrau);color:#fff;padding:11px 22px;border-radius:5px;font-size:13px;box-shadow:0 3px 10px rgba(0,0,0,.25);opacity:0;transition:opacity .3s;pointer-events:none;z-index:99}
+#toast.zeigen{opacity:1}
+#toast.fehler{background:var(--hm-rot)}
+
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #ccc;border-top-color:var(--hm-gold);border-radius:50%;animation:dreh .8s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes dreh{to{transform:rotate(360deg)}}
+
+footer{max-width:1060px;margin:10px auto 30px;padding:0 20px;font-size:11px;color:var(--hm-mittelgrau)}
+
+.btn-klein{padding:6px 12px;font-size:12px}
+
+/* Modul-Tabs */
+.tabbar{display:flex;gap:6px;margin-bottom:18px;border-bottom:2px solid var(--hm-gold);flex-wrap:wrap}
+.tabbar button{border:1px solid #ddd;border-bottom:none;background:#eee;color:var(--hm-mittelgrau);padding:10px 18px;font-family:Arial,sans-serif;font-weight:bold;font-size:13px;cursor:pointer;border-radius:5px 5px 0 0}
+.tabbar button.aktiv{background:var(--hm-gold);color:#333;border-color:var(--hm-gold)}
+.tabbar button:hover:not(.aktiv){background:#e2e2e2}
+
+/* EFB-Positionslisten */
+table.liste td input{padding:5px 7px;font-size:12.5px}
+table.liste tr.nichtkg td{background:#fdf6dd !important}
+table.liste td .del-btn{border:1px solid var(--hm-rot);background:transparent;color:var(--hm-rot);border-radius:4px;width:28px;height:28px;cursor:pointer;font-weight:bold}
+table.liste td .del-btn:hover{background:#fdeef1}
+.summenzeile{margin-top:12px;padding:12px 16px;background:#fdf3d0;border-top:2px solid var(--hm-gold);font-weight:bold;font-size:15px;display:flex;justify-content:space-between;border-radius:0 0 4px 4px}
+.linkleiste{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}
+.linkleiste a{display:inline-block;text-decoration:none;border:1px solid var(--hm-dunkelgrau);color:var(--hm-dunkelgrau);border-radius:4px;padding:7px 12px;font-size:12.5px;font-weight:bold}
+.linkleiste a:hover{background:var(--hm-hellgrau)}
+.zahlung-zeile{display:flex;gap:8px;margin-bottom:6px;align-items:center}
+.zahlung-zeile input.z-bez{flex:2}
+.zahlung-zeile input.z-betrag{flex:1;max-width:170px;text-align:right}
+.zahlung-zeile button{border:1px solid var(--hm-rot);background:transparent;color:var(--hm-rot);border-radius:4px;width:30px;height:30px;cursor:pointer;font-weight:bold;flex:none}
+.zahlung-zeile button:hover{background:#fdeef1}
+
+/* Dokument-Vorschau ("Papier"-Optik wie im Beschleunigungsrechner) */
+.papier-scroll{max-height:640px;overflow-y:auto;background:#e9e9e9;padding:18px;border-radius:4px;border:1px solid #ddd}
+.papier-scroll::-webkit-scrollbar{width:9px}
+.papier-scroll::-webkit-scrollbar-thumb{background:#bbb;border-radius:4px}
+.papier{background:#fff;width:100%;max-width:700px;margin:0 auto;padding:46px 52px;box-shadow:0 3px 16px rgba(0,0,0,.18);border:1px solid #eee;font-size:12.5px;line-height:1.6;color:var(--hm-text)}
+.papier .p-logo{display:block;max-width:170px;margin-bottom:6px}
+.papier .p-kopflinie{border-bottom:2px solid var(--hm-gold);margin-bottom:18px}
+.papier h1{font-size:17px;color:var(--hm-dunkelgrau);margin:0 0 8px}
+.papier .p-meta{font-size:12px;margin-bottom:4px}
+.papier h3{font-size:13.5px;color:var(--hm-dunkelgrau);border-bottom:1.5px solid var(--hm-gold);padding-bottom:4px;margin:20px 0 8px}
+.papier p{margin:0 0 9px}
+.papier table{width:100%;border-collapse:collapse;margin:8px 0 12px}
+.papier th{background:var(--hm-dunkelgrau);color:#fff;text-align:left;padding:6px 9px;font-size:11.5px}
+.papier th.z,.papier td.z{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.papier td{padding:6px 9px;border-bottom:1px solid #e5e5e5;font-size:12px}
+.papier tr:nth-child(even) td{background:var(--hm-hellgrau)}
+.papier tr.p-ergebnis td{background:#fdf3d0;font-weight:bold;border-top:2px solid var(--hm-gold)}
+.papier .p-anlage-bild{max-width:65%;display:block;margin:10px auto;border:1px solid #ddd}
+.papier .p-hinweis{font-style:italic;color:var(--hm-mittelgrau)}
+.papier .p-fusszeile{margin-top:24px;padding-top:6px;border-top:1px solid var(--hm-gold);font-size:10px;color:var(--hm-mittelgrau);display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+
+<header>
+  <img src="img/hoffmeier-logo.jpg" alt="Hoffmeier Industrieanlagen GmbH + Co. KG">
+  <div class="titles">
+    <h1>Baupreisindex &ndash; Bauzeitbedingte Preisfortschreibung</h1>
+    <p>Nachtragsberechnung nach Bau-Soll / Bau-Ist auf Basis der amtlichen Baupreisindizes (Destatis)</p>
+  </div>
+  <a class="hilfe-link" href="hilfe.html">? Hilfe</a>
+</header>
+
+<main>
+
+  <!-- ======================= Projektliste ======================= -->
+  <div id="view-list">
+    <div class="statusline" id="indexStatus"><span class="spinner"></span>Indexwerte werden von Destatis geladen &hellip;</div>
+    <div class="card">
+      <h2>Projekte</h2>
+      <div id="projektliste"><p class="muted">Lade Projekte &hellip;</p></div>
+      <div class="actions">
+        <button class="btn btn-gold" onclick="neuesProjekt()">+ Neues Projekt anlegen</button>
+        <button class="btn btn-ghost" onclick="ordnerOeffnen(null)">Projektordner &ouml;ffnen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= Projekt ======================= -->
+  <div id="view-project" class="hidden">
+
+    <div class="tabbar">
+      <button id="tabbtn-haupt" class="aktiv" onclick="tabWechseln('haupt')">Baupreisindex (allgemein)</button>
+      <button id="tabbtn-stahl" onclick="tabWechseln('stahl')">Stahlbau-Preisindex</button>
+      <button id="tabbtn-lohn" onclick="tabWechseln('lohn')">Lohnkostensteigerung (Tarif)</button>
+    </div>
+
+    <div id="tab-haupt">
+    <div class="card">
+      <h2 id="projektTitel">Neues Projekt</h2>
+      <div class="grid">
+        <div><label for="f_projektname">Projektname *</label><input id="f_projektname" placeholder="z. B. BW 4711 Brücke Musterstraße"></div>
+        <div><label for="f_auftraggeber">Auftraggeber</label><input id="f_auftraggeber" placeholder="z. B. Autobahn GmbH"></div>
+        <div class="full"><label for="f_massnahme">Baumaßnahme / Leistung</label><input id="f_massnahme" placeholder="kurze Beschreibung der beauftragten Leistung"></div>
+        <div><label for="f_summe">Auftragssumme (netto, €) *</label><input id="f_summe" inputmode="decimal" placeholder="525.000,00"></div>
+        <div>
+          <label for="f_indexreihe">Indexreihe (Destatis, 2021 = 100)</label>
+          <select id="f_indexreihe"></select>
+        </div>
+        <div class="full">
+          <label>Bereits vergütete Leistungen während der Bauzeit (Abschlagsrechnungen, Vorauszahlungen &hellip;)</label>
+          <div id="zahlungenListe"></div>
+          <div style="display:flex;align-items:center;gap:14px;margin-top:6px">
+            <button type="button" class="btn btn-ghost btn-klein" onclick="zahlungHinzufuegen()">+ Zahlung hinzuf&uuml;gen</button>
+            <span class="muted" id="zahlungenSumme"></span>
+          </div>
+        </div>
+        <div><label for="f_beginn_soll">Vertraglicher Ausführungsbeginn</label><input type="date" id="f_beginn_soll"></div>
+        <div><label for="f_ende_soll">Vertragliche Fertigstellung (Bau-Soll) *</label><input type="date" id="f_ende_soll"></div>
+        <div><label for="f_ende_ist">Tatsächliche Fertigstellung (Bau-Ist) *</label><input type="date" id="f_ende_ist"></div>
+        <div class="full">
+          <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="f_eigen" style="width:auto" onchange="eigenToggle()"> Eigenen Verzögerungsanteil herausrechnen (von Hoffmeier zu vertreten, optional)
+          </label>
+          <div id="eigenFelder" class="grid hidden" style="margin-top:10px">
+            <div><label for="f_eigen_tage">Eigenanteil (Kalendertage)</label><input id="f_eigen_tage" inputmode="numeric" placeholder="z. B. 14"></div>
+            <div><label for="f_eigen_grund">Bezeichnung / Grund</label><input id="f_eigen_grund" placeholder="z. B. eigene Umplanung Traggerüst"></div>
+          </div>
+        </div>
+        <div class="full"><label for="f_grund">Grund der Bauzeitverschiebung (vom AG zu vertreten)</label>
+          <textarea id="f_grund">Aufgrund einer vom Auftraggeber zu vertretenden Bauzeitverschiebung konnte die Leistung nicht entsprechend dem vertraglich vereinbarten Bauablauf ausgeführt werden.</textarea>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-gold" id="btnSpeichern" onclick="projektSpeichern()">Projekt speichern</button>
+        <button class="btn btn-ghost" onclick="zeigeListe()">Zur&uuml;ck zur Liste</button>
+        <button class="btn btn-rot hidden" id="btnLoeschen" onclick="projektLoeschen()">Projekt l&ouml;schen</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Berechnung der Preisfortschreibung</h2>
+      <div id="berechnungHinweise"></div>
+      <div id="berechnungTabelle"><p class="muted">Bitte Auftragssumme, Bau-Soll- und Bau-Ist-Fertigstellung erfassen.</p></div>
+      <div style="margin-top:14px">
+        <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="f_manuell" style="width:auto" onchange="manuellToggle()"> Indexwerte manuell übersteuern
+        </label>
+        <div id="manuellFelder" class="grid hidden" style="margin-top:10px;max-width:520px">
+          <div><label for="f_index_soll">Index Soll-Quartal</label><input id="f_index_soll" inputmode="decimal" placeholder="127,0"></div>
+          <div><label for="f_index_ist">Index Ist-Quartal</label><input id="f_index_ist" inputmode="decimal" placeholder="128,7"></div>
+        </div>
+      </div>
+      <div id="prognoseBox" class="hinweis rot hidden" style="margin-top:14px">
+        <strong>F&uuml;r das Ist-Quartal liegt noch kein amtlicher Indexwert vor</strong> (Destatis ver&ouml;ffentlicht zeitversetzt).
+        Optional kann ein <strong>Prognosewert</strong> per linearer Fortschreibung der letzten amtlichen Werte angesetzt werden &ndash;
+        er wird in Berechnung und Word-Export un&uuml;bersehbar als <strong style="color:var(--hm-rot)">vorl&auml;ufig, nicht amtlich</strong> gekennzeichnet.
+        <div style="margin-top:8px">
+          <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:12.5px;text-transform:none">
+            <input type="checkbox" id="f_prognose" style="width:auto" onchange="berechnungAnzeigen()"> Prognosewert verwenden (vorl&auml;ufig, nicht amtlich)
+          </label>
+        </div>
+        <div id="prognoseFelder" class="hidden" style="margin-top:8px">
+          Betrachtungszeitraum f&uuml;r die Trendermittlung:
+          <input id="f_prognose_n" inputmode="numeric" style="width:70px;display:inline-block" value="4"> letzte verf&uuml;gbare Quartale
+          <div id="prognoseDetails" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Dokument &ndash; Vorschau</h2>
+      <p class="muted" style="margin-bottom:10px">So sieht das fertige Word-Dokument aus (aktualisiert sich automatisch bei jeder Eingabe).</p>
+      <div class="papier-scroll"><div class="papier" id="dokVorschau"><p class="muted">Bitte Pflichtfelder ausfüllen.</p></div></div>
+    </div>
+
+    <div class="card">
+      <h2>Nachweis &amp; Word-Dokument</h2>
+      <p class="muted" style="margin-bottom:10px">Beim Anlegen des Projekts wird die Destatis-Tabelle als Foto gesichert, damit der Auftraggeber die Indexwerte nachprüfen kann. Quelle: <a href="https://www.destatis.de/DE/Themen/Wirtschaft/Konjunkturindikatoren/Preise/bpr210a.html" target="_blank" rel="noopener">destatis.de – Baupreisindizes (bpr210a)</a></p>
+      <div id="screenshotBereich"><p class="muted">Noch kein Nachweis-Foto vorhanden.</p></div>
+      <div class="actions">
+        <button class="btn btn-gold" id="btnWord" onclick="wordErzeugen()">Word-Dokument erzeugen</button>
+        <button class="btn btn-grey" id="btnShot" onclick="screenshotErstellen()">Nachweis-Foto neu erstellen</button>
+        <button class="btn btn-ghost" onclick="ordnerOeffnen(aktuellesProjekt && aktuellesProjekt.ordner)">Projektordner &ouml;ffnen</button>
+      </div>
+    </div>
+    </div><!-- /tab-haupt -->
+
+    <!-- ======================= Modul 2: Stahlbau-Preisindex ======================= -->
+    <div id="tab-stahl" class="hidden">
+
+      <div class="card">
+        <h2>Referenzzeitraum (Monatsebene)</h2>
+        <p class="muted" style="margin-bottom:10px">Der Stahlindex liegt monatlich vor. Die Monate folgen <strong>automatisch der Bauzeit</strong> aus dem Hauptmodul (Basismonat = vertragliche Fertigstellung, Endmonat = tats&auml;chliche Fertigstellung, ggf. bereinigt um den Eigenanteil) und k&ouml;nnen hier auf Monatsebene &uuml;bersteuert werden.</p>
+        <div class="grid" style="max-width:560px">
+          <div><label for="f_st_basis">Basismonat (vertraglicher Zeitpunkt)</label><input type="month" id="f_st_basis"></div>
+          <div><label for="f_st_ende">Endmonat (tats&auml;chliche Fertigstellung)</label><input type="month" id="f_st_ende"></div>
+        </div>
+        <div id="monateAutoHinweis" class="hinweis hidden" style="margin-top:10px">Monate manuell &uuml;bersteuert &ndash; sie folgen nicht mehr automatisch der Bauzeit.
+          <button type="button" class="btn btn-ghost btn-klein" style="margin-left:10px" onclick="monateZuruecksetzen()">Wieder aus Bauzeit &uuml;bernehmen</button>
+        </div>
+        <div id="stahlIndexWerte" class="hinweis" style="margin-top:14px">Indexwerte werden geladen &hellip;</div>
+      </div>
+
+      <div class="card">
+        <h2>Datenquelle: Erzeugerpreisindex Stahl (Destatis, Tabelle 61241, monatlich)</h2>
+        <div class="statusline" id="stahlStatus"><span class="spinner"></span>Stahlindex wird geladen &hellip;</div>
+        <details>
+          <summary style="cursor:pointer;font-weight:bold;font-size:13px;color:var(--hm-dunkelgrau)">Datenquelle konfigurieren (GP-Code / GENESIS-Zugangsdaten)</summary>
+          <div class="grid" style="margin-top:12px;max-width:720px">
+            <div><label for="f_st_gpcode">GP-Code (G&uuml;terverzeichnis GP2019)</label><input id="f_st_gpcode" placeholder="GP19-24"></div>
+            <div><label for="f_st_gplabel">Bezeichnung des Codes</label><input id="f_st_gplabel" placeholder="Metalle (GP19-24)"></div>
+            <div><label for="f_st_user">GENESIS-Benutzername (E-Mail des Kontos)</label><input id="f_st_user" autocomplete="off" placeholder="name@firma.de"></div>
+            <div><label for="f_st_pass">GENESIS-Passwort</label><input type="password" id="f_st_pass" autocomplete="new-password" placeholder="Passwort des GENESIS-Kontos"></div>
+          </div>
+          <p class="muted" style="margin-top:8px">Kostenlose Registrierung auf www-genesis.destatis.de. Die Zugangsdaten werden nur lokal gespeichert (<code>app\data\stahl-config.json</code>) und ausschlie&szlig;lich f&uuml;r den Indexabruf bei Destatis verwendet.</p>
+          <div class="actions">
+            <button class="btn btn-grey btn-klein" onclick="stahlConfigSpeichern()">Konfiguration speichern &amp; neu laden</button>
+            <a class="btn btn-ghost btn-klein" href="https://genesis.destatis.de/datenbank/online/statistic/61241/table/61241-0006/table-toolbar/search/s/NjEyNDE%3D#filter=JTdCJTIyaGlkZUVtcHR5Q29scyUyMiUzQWZhbHNlJTJDJTIyaGlkZUVtcHR5Um93cyUyMiUzQWZhbHNlJTJDJTIyY2FwdGlvbiUyMiUzQSU1QiU3QiUyMnZhcmlhYmxlSWQlMjIlM0ElMjI2MTI0MSUyMiUyQyUyMmlkJTIyJTNBJTIyZmlsdGVyLjAlMjIlMkMlMjJ2YWx1ZXNJZHMlMjIlM0ElNUIlMjI2MTI0MSUyMiU1RCUyQyUyMmNoaWxkcmVuJTIyJTNBJTVCJTdCJTIydmFyaWFibGVJZCUyMiUzQSUyMkRJTlNHJTIyJTJDJTIyaWQlMjIlM0ElMjJmaWx0ZXIuMC4wJTIyJTJDJTIydmFsdWVzSWRzJTIyJTNBJTVCJTIyREclMjIlNUQlMkMlMjJjaGlsZHJlbiUyMiUzQSU1QiU3QiUyMnZhcmlhYmxlSWQlMjIlM0ElMjJQUkUwMDElMjIlMkMlMjJpZCUyMiUzQSUyMmZpbHRlci4wLjAuMCUyMiUyQyUyMnZhbHVlc0lkcyUyMiUzQSU1QiUyMlFNVSUyMiU1RCUyQyUyMmNoaWxkcmVuJTIyJTNBJTVCJTVEJTJDJTIyc2hvd0FzSW50ZXJsaW5lJTIyJTNBZmFsc2UlMkMlMjJpc0hpZGRlbiUyMiUzQWZhbHNlJTJDJTIyYmxvY2tDb2RlJTIyJTNBJTIyYzElMjIlMkMlMjJwb3NzaWJsZVBsYWNlcyUyMiUzQSU1QiU1RCU3RCU1RCUyQyUyMnNob3dBc0ludGVybGluZSUyMiUzQWZhbHNlJTJDJTIyc2hvd1ZhcmlhYmxlJTIyJTNBZmFsc2UlMkMlMjJzaG93VmFyaWFibGVWYWx1ZSUyMiUzQSU1QiUyMkxBQkVMJTIyJTVEJTJDJTIyc29ydCUyMiUzQSUyMk5hbWVBc2MlMjIlMkMlMjJpc0hpZGRlbiUyMiUzQWZhbHNlJTJDJTIyYmxvY2tDb2RlJTIyJTNBJTIydjElMjIlMkMlMjJwb3NzaWJsZVBsYWNlcyUyMiUzQSU1QiU1RCU3RCU1RCUyQyUyMnNob3dBc0ludGVybGluZSUyMiUzQWZhbHNlJTJDJTIyaXNIaWRkZW4lMjIlM0FmYWxzZSUyQyUyMmJsb2NrQ29kZSUyMiUzQSUyMnMxJTIyJTJDJTIycG9zc2libGVQbGFjZXMlMjIlM0ElNUIlNUQlN0QlNUQlMkMlMjJyb3dIZWFkZXIlMjIlM0ElNUIlN0IlMjJ2YXJpYWJsZUlkJTIyJTNBJTIyR1AxOU0yJTIyJTJDJTIyaWQlMjIlM0ElMjJyb3dUaXRsZS4wJTIyJTJDJTIydmFsdWVzSWRzJTIyJTNBJTVCJTIyR1AxOS0yNCUyMiU1RCUyQyUyMmNoaWxkcmVuJTIyJTNBJTVCJTVEJTJDJTIyc2hvd0FzSW50ZXJsaW5lJTIyJTNBZmFsc2UlMkMlMjJzaG93VmFyaWFibGUlMjIlM0F0cnVlJTJDJTIyc2hvd1ZhcmlhYmxlVmFsdWUlMjIlM0ElNUIlMjJJRCUyMiUyQyUyMkxBQkVMJTIyJTVEJTJDJTIyaXNIaWRkZW4lMjIlM0FmYWxzZSUyQyUyMmJsb2NrQ29kZSUyMiUzQSUyMnY0JTIyJTJDJTIycG9zc2libGVQbGFjZXMlMjIlM0ElNUIlNUQlN0QlNUQlMkMlMjJjb2x1bW5IZWFkZXIlMjIlM0ElNUIlN0IlMjJ2YXJpYWJsZUlkJTIyJTNBJTIySkFIUiUyMiUyQyUyMmlkJTIyJTNBJTIyY29sVGl0bGUuMCUyMiUyQyUyMnZhbHVlc0lkcyUyMiUzQSU1QiUyMjIwMjYlMjIlNUQlMkMlMjJjaGlsZHJlbiUyMiUzQSU1QiU3QiUyMnZhcmlhYmxlSWQlMjIlM0ElMjJNT05BVCUyMiUyQyUyMmlkJTIyJTNBJTIyY29sVGl0bGUuMC4wJTIyJTJDJTIydmFsdWVzSWRzJTIyJTNBJTVCJTIyTU9OQVQwMSUyMiUyQyUyMk1PTkFUMDIlMjIlMkMlMjJNT05BVDAzJTIyJTJDJTIyTU9OQVQwNCUyMiUyQyUyMk1PTkFUMDUlMjIlMkMlMjJNT05BVDA2JTIyJTJDJTIyTU9OQVQwNyUyMiUyQyUyMk1PTkFUMDglMjIlMkMlMjJNT05BVDA5JTIyJTJDJTIyTU9OQVQxMCUyMiUyQyUyMk1PTkFUMTElMjIlMkMlMjJNT05BVDEyJTIyJTVEJTJDJTIyY2hpbGRyZW4lMjIlM0ElNUIlNUQlMkMlMjJzaG93QXNJbnRlcmxpbmUlMjIlM0FmYWxzZSUyQyUyMnNob3dWYXJpYWJsZSUyMiUzQWZhbHNlJTJDJTIyc2hvd1ZhcmlhYmxlVmFsdWUlMjIlM0ElNUIlMjJMQUJFTCUyMiU1RCUyQyUyMnNvcnQlMjIlM0ElMjJDb2RlQXNjJTIyJTJDJTIyaXNIaWRkZW4lMjIlM0FmYWxzZSUyQyUyMmJsb2NrQ29kZSUyMiUzQSUyMnYzJTIyJTJDJTIycG9zc2libGVQbGFjZXMlMjIlM0ElNUIlN0IlMjJwcmV2UGFyZW50JTIyJTNBJTdCJTIyYmxvY2tDb2RlJTIyJTNBJTIydjIlMjIlMkMlMjJpZCUyMiUzQSUyMmNvbFRpdGxlLjAlMjIlN0QlMkMlMjJlbGVtZW50QWJvdmUlMjIlM0FudWxsJTJDJTIyZWxlbWVudEJlbG93JTIyJTNBJTdCJTIyYmxvY2tDb2RlJTIyJTNBJTIydjIlMjIlMkMlMjJpZCUyMiUzQSUyMmNvbFRpdGxlLjAlMjIlN0QlMkMlMjJuZXdTaWJsaW5nSW5kZXglMjIlM0EwJTJDJTIyaGFzVHJhbnNwb3NlUGFydCUyMiUzQWZhbHNlJTdEJTJDJTdCJTIycHJldlBhcmVudCUyMiUzQSU3QiUyMmJsb2NrQ29kZSUyMiUzQSUyMnYyJTIyJTJDJTIyaWQlMjIlM0ElMjJjb2xUaXRsZS4wJTIyJTdEJTJDJTIyZWxlbWVudEFib3ZlJTIyJTNBbnVsbCUyQyUyMmVsZW1lbnRCZWxvdyUyMiUzQSU3QiUyMmJsb2NrQ29kZSUyMiUzQSUyMnY0JTIyJTJDJTIyaWQlMjIlM0ElMjJyb3dUaXRsZS4wJTIyJTdEJTJDJTIybmV3U2libGluZ0luZGV4JTIyJTNBMCUyQyUyMmhhc1RyYW5zcG9zZVBhcnQlMjIlM0F0cnVlJTdEJTJDJTdCJTIycHJldlBhcmVudCUyMiUzQSU3QiUyMmJsb2NrQ29kZSUyMiUzQSUyMnYyJTIyJTJDJTIyaWQlMjIlM0ElMjJjb2xUaXRsZS4wJTIyJTdEJTJDJTIybmV3UGFyZW50JTIyJTNBJTdCJTIyYmxvY2tDb2RlJTIyJTNBJTIydjQlMjIlMkMlMjJpZCUyMiUzQSUyMnJvd1RpdGxlLjAlMjIlN0QlMkMlMjJlbGVtZW50QWJvdmUlMjIlM0ElN0IlMjJibG9ja0NvZGUlMjIlM0ElMjJ2NCUyMiUyQyUyMmlkJTIyJTNBJTIycm93VGl0bGUuMCUyMiU3RCUyQyUyMmVsZW1lbnRCZWxvdyUyMiUzQW51bGwlMkMlMjJuZXdTaWJsaW5nSW5kZXglMjIlM0EwJTJDJTIyaGFzVHJhbnNwb3NlUGFydCUyMiUzQXRydWUlN0QlNUQlN0QlNUQlMkMlMjJzaG93QXNJbnRlcmxpbmUlMjIlM0FmYWxzZSUyQyUyMnNob3dWYXJpYWJsZSUyMiUzQWZhbHNlJTJDJTIyc2hvd1ZhcmlhYmxlVmFsdWUlMjIlM0ElNUIlMjJMQUJFTCUyMiU1RCUyQyUyMmlzSGlkZGVuJTIyJTNBZmFsc2UlMkMlMjJibG9ja0NvZGUlMjIlM0ElMjJ2MiUyMiUyQyUyMnBvc3NpYmxlUGxhY2VzJTIyJTNBJTVCJTdCJTIybmV3UGFyZW50JTIyJTNBJTdCJTIyYmxvY2tDb2RlJTIyJTNBJTIydjMlMjIlMkMlMjJpZCUyMiUzQSUyMmNvbFRpdGxlLjAuMCUyMiU3RCUyQyUyMmVsZW1lbnRBYm92ZSUyMiUzQSU3QiUyMmJsb2NrQ29kZSUyMiUzQSUyMnYzJTIyJTJDJTIyaWQlMjIlM0ElMjJjb2xUaXRsZS4wLjAlMjIlN0QlMkMlMjJlbGVtZW50QmVsb3clMjIlM0FudWxsJTJDJTIybmV3U2libGluZ0luZGV4JTIyJTNBMCUyQyUyMmhhc1RyYW5zcG9zZVBhcnQlMjIlM0FmYWxzZSU3RCUyQyU3QiUyMmVsZW1lbnRBYm92ZSUyMiUzQW51bGwlMkMlMjJlbGVtZW50QmVsb3clMjIlM0ElN0IlMjJibG9ja0NvZGUlMjIlM0ElMjJ2NCUyMiUyQyUyMmlkJTIyJTNBJTIycm93VGl0bGUuMCUyMiU3RCUyQyUyMm5ld1NpYmxpbmdJbmRleCUyMiUzQTAlMkMlMjJoYXNUcmFuc3Bvc2VQYXJ0JTIyJTNBdHJ1ZSU3RCUyQyU3QiUyMm5ld1BhcmVudCUyMiUzQSU3QiUyMmJsb2NrQ29kZSUyMiUzQSUyMnY0JTIyJTJDJTIyaWQlMjIlM0ElMjJyb3dUaXRsZS4wJTIyJTdEJTJDJTIyZWxlbWVudEFib3ZlJTIyJTNBJTdCJTIyYmxvY2tDb2RlJTIyJTNBJTIydjQlMjIlMkMlMjJpZCUyMiUzQSUyMnJvd1RpdGxlLjAlMjIlN0QlMkMlMjJlbGVtZW50QmVsb3clMjIlM0FudWxsJTJDJTIybmV3U2libGluZ0luZGV4JTIyJTNBMCUyQyUyMmhhc1RyYW5zcG9zZVBhcnQlMjIlM0F0cnVlJTdEJTVEJTdEJTVEJTJDJTIyZml4Rmlyc3RDb2x1bW5zJTIyJTNBZmFsc2UlN0Q=&amp;sortByValue=default" target="_blank" rel="noopener">Tabelle 61241 (GP19-24 Metalle, monatlich) auf GENESIS-Online &ouml;ffnen ↗</a>
+          </div>
+        </details>
+        <div class="grid" style="margin-top:16px;max-width:520px">
+          <div><label for="f_st_index_basis">Index Basismonat</label><input id="f_st_index_basis" inputmode="decimal" placeholder="wird automatisch bef&uuml;llt"></div>
+          <div><label for="f_st_index_ende">Index Endmonat</label><input id="f_st_index_ende" inputmode="decimal" placeholder="wird automatisch bef&uuml;llt"></div>
+        </div>
+        <p class="muted" style="margin-top:6px">Die Felder werden automatisch mit den Destatis-Werten der gew&auml;hlten Referenzmonate bef&uuml;llt und k&ouml;nnen bei Bedarf &uuml;berschrieben werden.</p>
+        <div id="indexAutoHinweis" class="hinweis hidden" style="margin-top:10px">Indexwerte manuell &uuml;bersteuert &ndash; sie folgen nicht mehr automatisch dem Destatis-Abruf.
+          <button type="button" class="btn btn-ghost btn-klein" style="margin-left:10px" onclick="indexZuruecksetzen()">Wieder automatisch bef&uuml;llen</button>
+        </div>
+        <div id="stahlPrognoseBox" class="hinweis rot hidden" style="margin-top:14px">
+          <strong>F&uuml;r den Endmonat liegt noch kein amtlicher Indexwert vor</strong> (Destatis ver&ouml;ffentlicht Monatswerte erst rund 4&ndash;6 Wochen nach Monatsende).
+          Optional kann ein <strong>Prognosewert</strong> per linearer Fortschreibung der letzten amtlichen Monatswerte angesetzt werden &ndash;
+          er wird in Berechnung und Word-Export un&uuml;bersehbar als <strong style="color:var(--hm-rot)">vorl&auml;ufig, nicht amtlich</strong> gekennzeichnet.
+          <div style="margin-top:8px">
+            <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:12.5px">
+              <input type="checkbox" id="f_st_prognose" style="width:auto" onchange="stahlPrognoseToggle()"> Prognosewert verwenden (vorl&auml;ufig, nicht amtlich)
+            </label>
+          </div>
+          <div id="stahlPrognoseFelder" class="hidden" style="margin-top:8px">
+            Betrachtungszeitraum f&uuml;r die Trendermittlung:
+            <input id="f_st_prognose_n" inputmode="numeric" style="width:70px;display:inline-block" value="12"> letzte verf&uuml;gbare Monate
+            <div id="stahlPrognoseDetails" style="margin-top:8px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>EFB 223 &ndash; Kalkulierte Materialkosten Stahlbau</h2>
+        <p class="muted" style="margin-bottom:10px">EFB-223-Formblatt (PDF) hochladen. Anschlie&szlig;end bitte alle Positionen <strong>manuell l&ouml;schen</strong>, die nicht stahlbaurelevant sind &ndash; insbesondere Positionen ohne Mengeneinheit &bdquo;t&ldquo; oder &bdquo;kg&ldquo; (gelb markiert). Die fachliche Pr&uuml;fung liegt beim Anwender.</p>
+        <div class="actions" style="margin-top:0;margin-bottom:12px">
+          <label class="btn btn-gold" style="margin:0">EFB-223-PDF hochladen<input type="file" id="f_efb_pdf_stahl" accept="application/pdf" class="hidden" onchange="efbHochladen(this)"></label>
+          <button class="btn btn-ghost btn-klein" onclick="efbZuruecksetzen('stahl')">Gel&ouml;schte Positionen wiederherstellen</button>
+          <button class="btn btn-ghost btn-klein" onclick="efbPositionHinzufuegen('stahl')">+ Position manuell erg&auml;nzen</button>
+          <span class="muted" id="efbDateiStahl"></span>
+        </div>
+        <div id="stahlPositionen"><p class="muted">Noch kein EFB 223 hochgeladen.</p></div>
+        <div class="summenzeile"><span>Kalkulierte Materialkosten Stahlbau (Summe der verbleibenden Positionen)</span><span id="stahlSumme">0,00 €</span></div>
+      </div>
+
+      <div class="card">
+        <h2>Berechnung der Stahlpreissteigerung</h2>
+        <div id="stahlHinweise"></div>
+        <div id="stahlBerechnung"><p class="muted">Bitte Referenzmonate erfassen und EFB-223-Positionen laden.</p></div>
+      </div>
+    </div><!-- /tab-stahl -->
+
+    <!-- ======================= Modul 3: Lohnkostensteigerung ======================= -->
+    <div id="tab-lohn" class="hidden">
+
+      <div class="card">
+        <h2>Tarifentwicklung &ndash; Datenbasis</h2>
+        <div style="display:flex;gap:22px;flex-wrap:wrap;margin-bottom:14px">
+          <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;color:var(--hm-text)">
+            <input type="radio" name="lohnModus" id="f_lohn_modus_index" style="width:auto" checked onchange="lohnModusWechseln('index')">
+            <span><strong>Automatisch:</strong> Amtlicher Tarifindex (Destatis, empfohlen)</span>
+          </label>
+          <label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;text-transform:none;letter-spacing:0;color:var(--hm-text)">
+            <input type="radio" name="lohnModus" id="f_lohn_modus_stufen" style="width:auto" onchange="lohnModusWechseln('stufen')">
+            <span><strong>Manuell:</strong> Tarifstufen selbst eintragen (IG Metall / METALL NRW)</span>
+          </label>
+        </div>
+
+        <!-- Automatischer Weg: Destatis-Index der Tarifverdienste -->
+        <div id="lohnModusIndex">
+          <div class="statusline" id="tarifIndexStatus"><span class="spinner"></span>Tarifindex wird geladen &hellip;</div>
+          <div id="tarifIndexWerte" class="hinweis">Indexwerte werden geladen &hellip;</div>
+          <p class="muted" style="margin-top:10px">Der <strong>Index der Tarifverdienste</strong> (Destatis, GENESIS-Online, Tabelle 62221, viertelj&auml;hrlich, nach Wirtschaftszweigen) ist eine amtliche, f&uuml;r beide Vertragsparteien nachpr&uuml;fbare Quelle der Tariflohnentwicklung &ndash; gleiche Systematik wie in Modul&nbsp;1 und&nbsp;2. Als erg&auml;nzender Beleg dient das standardisierte, amtliche M+E-&Uuml;bersichtsblatt des <strong>Tarifregisters NRW</strong> (dauerhaft gleiche Adresse, wird vom Land NRW aktuell gehalten).</p>
+          <div class="linkleiste">
+            <a href="https://www.tarifregister.nrw.de/material/metall_elektro2.pdf" target="_blank" rel="noopener">Tarifregister NRW &ndash; M+E-&Uuml;bersichtsblatt (amtliches PDF) &nbsp;↗</a>
+            <button type="button" class="btn btn-ghost btn-klein" onclick="tarifBelegSpeichern()" style="border-color:var(--hm-dunkelgrau)">Beleg-PDF in den Projektordner laden</button>
+          </div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;font-weight:bold;font-size:13px;color:var(--hm-dunkelgrau)">Datenquelle konfigurieren (Wirtschaftszweig / Wertmerkmal)</summary>
+            <div class="grid" style="margin-top:12px;max-width:720px">
+              <div><label for="f_ti_wzcode">WZ-Code (Klassifikation WZ2008)</label><input id="f_ti_wzcode" placeholder="WZ08-25"></div>
+              <div><label for="f_ti_wzlabel">Bezeichnung des Wirtschaftszweigs</label><input id="f_ti_wzlabel" placeholder="Herstellung von Metallerzeugnissen (WZ08-25)"></div>
+              <div class="full"><label for="f_ti_wertfilter">Wertmerkmal (Teilstring, w&auml;hlt die Messgr&ouml;&szlig;e der Tabelle)</label><input id="f_ti_wertfilter" placeholder="Monatsverdienste ohne Sonderzahlungen"></div>
+            </div>
+            <p class="muted" style="margin-top:8px">Verwendet dasselbe GENESIS-Konto wie der Stahlindex (Zugangsdaten im Stahlbau-Tab hinterlegen).</p>
+            <div class="actions">
+              <button class="btn btn-grey btn-klein" onclick="tarifindexConfigSpeichern()">Konfiguration speichern &amp; neu laden</button>
+            </div>
+          </details>
+        </div>
+
+        <!-- Manueller Weg: Tarifstufen (bisherige Logik) -->
+        <div id="lohnModusStufen" class="hidden">
+          <div class="hinweis rot"><strong>Bitte aktuellen Tarifabschluss vor Verwendung &uuml;ber die verlinkten Quellen pr&uuml;fen</strong> &ndash; der manuelle Weg liefert keine automatische Live-Aktualisierung. Die Nachschlagetabelle ist eine unverbindliche Hilfe.</div>
+          <div class="linkleiste">
+            <a href="https://www.tarifregister.nrw.de/material/metall_elektro2.pdf" target="_blank" rel="noopener">Tarifregister NRW &ndash; M+E-&Uuml;bersichtsblatt (amtliches PDF) &nbsp;↗</a>
+            <a href="https://www.igmetall.de/tarif/tarifrunden/metall-und-elektro" target="_blank" rel="noopener">IG Metall &ndash; Tarifrunden M+E &nbsp;↗</a>
+            <a href="https://www.metall.nrw/tarif/m-e-tarifrunden-archiv/" target="_blank" rel="noopener">METALL NRW &ndash; Tarifrunden-Archiv &nbsp;↗</a>
+            <a href="https://www.igmetall.de/tarif/tariftabellen/dfi---tarifdaten-und-abschluesse" target="_blank" rel="noopener">IG Metall &ndash; Tariftabellen / DFI &nbsp;↗</a>
+          </div>
+          <h3 style="font-size:13px;color:var(--hm-dunkelgrau);margin:14px 0 6px">Nachschlagehilfe: bekannte Tarifabschl&uuml;sse (editierbar, Klick &uuml;bernimmt die Stufe)</h3>
+          <div id="tarifStammdaten"><p class="muted">Lade Stammdaten &hellip;</p></div>
+          <h3 style="font-size:13px;color:var(--hm-dunkelgrau);margin:18px 0 6px">Im Betrachtungszeitraum zutreffende Tarifstufen (Eingabe durch den Anwender)</h3>
+          <div id="tarifStufenListe"></div>
+          <div style="display:flex;align-items:center;gap:14px;margin-top:6px">
+            <button type="button" class="btn btn-ghost btn-klein" onclick="tarifStufeHinzufuegen()">+ Tarifstufe hinzuf&uuml;gen</button>
+            <span class="muted" id="tarifSumme"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>EFB 223 &ndash; Kalkulierte Lohnkosten</h2>
+        <p class="muted" style="margin-bottom:10px">Eigene, von Modul&nbsp;2 unabh&auml;ngige Positionsauswahl: Bitte alle Positionen <strong>manuell l&ouml;schen</strong>, die keinen eigenen Lohnanteil haben (z.&nbsp;B. reine Fremd-/Nachunternehmerleistungen). Ein bereits im Stahlbau-Tab hochgeladenes EFB&nbsp;223 wird automatisch wiederverwendet.</p>
+        <div class="actions" style="margin-top:0;margin-bottom:12px">
+          <label class="btn btn-gold" style="margin:0">EFB-223-PDF hochladen<input type="file" id="f_efb_pdf_lohn" accept="application/pdf" class="hidden" onchange="efbHochladen(this)"></label>
+          <button class="btn btn-ghost btn-klein" onclick="efbZuruecksetzen('lohn')">Gel&ouml;schte Positionen wiederherstellen</button>
+          <button class="btn btn-ghost btn-klein" onclick="efbPositionHinzufuegen('lohn')">+ Position manuell erg&auml;nzen</button>
+          <span class="muted" id="efbDateiLohn"></span>
+        </div>
+        <div id="lohnPositionen"><p class="muted">Noch kein EFB 223 hochgeladen.</p></div>
+        <div class="summenzeile"><span>Kalkulierte Lohnkosten (Summe der verbleibenden Positionen)</span><span id="lohnSumme">0,00 €</span></div>
+      </div>
+
+      <div class="card">
+        <h2>Berechnung der Lohnkostensteigerung</h2>
+        <div id="lohnHinweise"></div>
+        <div id="lohnBerechnung"><p class="muted">Bitte Tarifstufen erfassen und EFB-223-Positionen laden.</p></div>
+      </div>
+    </div><!-- /tab-lohn -->
+
+    <!-- Export Modul 2 / 3 -->
+    <div id="modulExportCard" class="card hidden">
+      <h2>Word-Export (Hoffmeier CI)</h2>
+      <p class="muted" style="margin-bottom:10px">Frei w&auml;hlbar: nur Stahlpreissteigerung, nur Lohnsteigerung oder beide Berechnungen gemeinsam in einem Dokument (mit Gesamtsummenzeile). Das Hauptmodul wird weiterhin separat &uuml;ber seinen eigenen Tab exportiert.</p>
+      <div class="actions">
+        <button class="btn btn-gold" id="btnExportStahl" onclick="modulWordErzeugen(true,false)">Nur Modul 2 (Stahl) exportieren</button>
+        <button class="btn btn-gold" id="btnExportLohn" onclick="modulWordErzeugen(false,true)">Nur Modul 3 (Lohn) exportieren</button>
+        <button class="btn btn-grey" id="btnExportBeide" onclick="modulWordErzeugen(true,true)">Modul 2 + 3 gemeinsam exportieren</button>
+        <button class="btn btn-ghost" onclick="ordnerOeffnen(aktuellesProjekt && aktuellesProjekt.ordner)">Projektordner &ouml;ffnen</button>
+      </div>
+      <p class="muted" id="exportHinweis" style="margin-top:8px"></p>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>Hoffmeier Industrieanlagen GmbH + Co. KG &middot; Baupreisindex-App &middot; Indexquelle: Statistisches Bundesamt (Destatis), Baupreisindizes 2021&nbsp;=&nbsp;100</footer>
+
+<div id="toast"></div>
+
+<script src="vendor/docx.iife.js"></script>
+<script src="vendor/pdf.min.js"></script>
+<script>if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = "vendor/pdf.worker.min.js";</script>
+<script src="app.js"></script>
+<script src="module.js"></script>
+</body>
+</html>
